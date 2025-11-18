@@ -1,7 +1,7 @@
-# vscode-auto-restart-typescript-eslint-servers
+# vscode-auto-restart-typescript-and-eslint
 
 Restart TypeScript or ESLint server automatically if monitored configuration or files changed. 
-<img src="https://raw.githubusercontent.com/christophehurpeau/vscode-auto-restart-typescript-eslint-servers/master/images/_banner.png" alt="Banner" />
+<img src="https://raw.githubusercontent.com/christophehurpeau/vscode-auto-restart-typescript-and-eslint/master/images/_banner.png" alt="Banner" />
 
 ## Fork
 
@@ -19,7 +19,7 @@ Changes includes :
 ```
 
 ## VS Code Marketplace:
-https://marketplace.visualstudio.com/items?itemName=chrp.vscode-auto-restart-typescript-eslint-servers
+https://marketplace.visualstudio.com/items?itemName=chrp.vscode-auto-restart-typescript-and-eslint
 
 
 ## Features
@@ -32,13 +32,13 @@ https://marketplace.visualstudio.com/items?itemName=chrp.vscode-auto-restart-typ
 Clone the repository using the command: 
 
 ```bash
-git clone https://github.com/chrp/vscode-auto-restart-typescript-eslint-servers
+git clone https://github.com/christophehurpeau/vscode-auto-restart-typescript-and-eslint
 ```
 
 ### 2. Install Dependencies
 Navigate to the repository folder:
 ```bash
-cd vscode-auto-restart-typescript-eslint-servers
+cd vscode-auto-restart-typescript-and-eslint
 ```
 Install the required dependencies:
 ```bash
@@ -61,7 +61,7 @@ npm run install-vsix <path-to-vsix>
 ```
 
 ### 6. Verify Installation
-Open VSCode, navigate to the `Extensions` tab in the sidebar, and search for `chrp.vscode-auto-restart-typescript-eslint-servers` to ensure the extension is installed correctly.
+Open VSCode, navigate to the `Extensions` tab in the sidebar, and search for `chrp.vscode-auto-restart-typescript-and-eslint` to ensure the extension is installed correctly.
 
 ### 7. Test the Extension
 You can now test the functionality of the extension within VSCode.

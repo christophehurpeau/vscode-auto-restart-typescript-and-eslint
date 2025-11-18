@@ -1,20 +1,20 @@
 {
-  "name": "vscode-auto-restart-typescript-eslint-servers",
-  "displayName": "Auto Restart TypeScript / ESLint Servers",
-  "description": "Restart TypeScript / ESLint servers when monitored files were changed.",
+  "name": "vscode-auto-restart-typescript-and-eslint",
+  "displayName": "Auto Restart TypeScript / ESLint",
+  "description": "Restart TypeScript / ESLint when monitored files were changed.",
   "publisher": "chrp",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "engines": {
     "vscode": "^1.74.0"
   },
   "icon": "images/icon.png",
-  "homepage": "https://github.com/neotan/vscode-auto-restart-typescript-eslint-servers.git",
+  "homepage": "https://github.com/christophehurpeau/vscode-auto-restart-typescript-and-eslint.git",
   "repository": {
     "type": "git",
-    "url": "https://github.com/neotan/vscode-auto-restart-typescript-eslint-servers.git"
+    "url": "https://github.com/christophehurpeau/vscode-auto-restart-typescript-and-eslint.git"
   },
   "bugs": {
-    "url": "https://github.com/neotan/vscode-auto-restart-typescript-eslint-servers.git/issues"
+    "url": "https://github.com/christophehurpeau/vscode-auto-restart-typescript-and-eslint.git/issues"
   },
   "keywords": [
     "monitor",
@@ -114,6 +114,7 @@
     "@typescript-eslint/eslint-plugin": "^5.45.0",
     "@typescript-eslint/parser": "^5.45.0",
     "eslint": "^8.28.0",
-    "typescript": "^4.9.3"
+    "typescript": "^4.9.3",
+    "vsce": "2.15.0"
   }
 }

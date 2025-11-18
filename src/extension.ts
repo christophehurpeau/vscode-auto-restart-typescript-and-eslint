@@ -34,7 +34,7 @@ type ConfigProperties = {
 
 const TS_EXT_ID = 'vscode.typescript-language-features'
 const ESLINT_EXT_ID = 'dbaeumer.vscode-eslint'
-const THIS_EXT_NAME = 'vscode-auto-restart-typescript-eslint-servers'
+const THIS_EXT_NAME = 'vscode-auto-restart-typescript-and-eslint'
 const THIS_EXT_ID = `chrp.${THIS_EXT_NAME}`
 const THIS_EXT_CONFIG_PREFIX = `autoRestart` // i.e. Configuration `section`
 
