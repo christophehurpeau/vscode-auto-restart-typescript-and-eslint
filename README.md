@@ -1,10 +1,25 @@
 # vscode-auto-restart-typescript-eslint-servers
 
 Restart TypeScript or ESLint server automatically if monitored configuration or files changed. 
-<img src="https://raw.githubusercontent.com/neotan/vscode-auto-restart-typescript-eslint-servers/master/images/_banner.png" alt="Banner" />
+<img src="https://raw.githubusercontent.com/christophehurpeau/vscode-auto-restart-typescript-eslint-servers/master/images/_banner.png" alt="Banner" />
+
+## Fork
+
+Fork of [vscode-restart-ts-server-button](https://github.com/neotan/vscode-auto-restart-typescript-eslint-servers) by [Neotan](github.com/neotan).
+Changes includes :
+- Updated globs for eslint/typescript
+- Debounce to prevents restarts happening too often
+
+## Make sure `node_modules` are ignored in your watchers
+
+```json
+  "files.watcherExclude": {
+    "**/node_modules/**": true
+  },
+```
 
 ## VS Code Marketplace:
-https://marketplace.visualstudio.com/items?itemName=neotan.vscode-auto-restart-typescript-eslint-servers
+https://marketplace.visualstudio.com/items?itemName=chrp.vscode-auto-restart-typescript-eslint-servers
 
 
 ## Features
@@ -17,7 +32,7 @@ https://marketplace.visualstudio.com/items?itemName=neotan.vscode-auto-restart-t
 Clone the repository using the command: 
 
 ```bash
-git clone https://github.com/neotan/vscode-auto-restart-typescript-eslint-servers
+git clone https://github.com/chrp/vscode-auto-restart-typescript-eslint-servers
 ```
 
 ### 2. Install Dependencies
@@ -46,7 +61,7 @@ npm run install-vsix <path-to-vsix>
 ```
 
 ### 6. Verify Installation
-Open VSCode, navigate to the `Extensions` tab in the sidebar, and search for `neotan.vscode-auto-restart-typescript-eslint-servers` to ensure the extension is installed correctly.
+Open VSCode, navigate to the `Extensions` tab in the sidebar, and search for `chrp.vscode-auto-restart-typescript-eslint-servers` to ensure the extension is installed correctly.
 
 ### 7. Test the Extension
 You can now test the functionality of the extension within VSCode.
@@ -56,6 +71,7 @@ You can now test the functionality of the extension within VSCode.
 
 
 ## Credits
+* [vscode-restart-ts-server-button](https://github.com/neotan/vscode-auto-restart-typescript-eslint-servers) by [Neotan](github.com/neotan)
 * [vscode-restart-ts-server-button](https://github.com/qcz/vscode-restart-ts-server-button) by [Qcz](github.com/qcz)
 * [vscode-eslint](https://github.com/microsoft/vscode-eslint) by [Microsoft](github.com/microsoft)
  

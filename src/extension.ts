@@ -9,11 +9,25 @@ import {
   workspace,
 } from 'vscode'
 
+const debounce = function (func: (...args: any[]) => void, wait: number) {
+  let timeout: NodeJS.Timeout | undefined
+  return function (...args: any[]) {
+    const later = () => {
+      timeout = undefined
+      func(...args)
+    }
+    if (timeout) {
+      clearTimeout(timeout)
+    }
+    timeout = setTimeout(later, wait)
+  }
+}
+
 type ConfigProperties = {
   monitorFilesForTypescript: boolean
   monitorFilesForESLint: boolean
-  fileGlobForTypescript: GlobPattern | GlobPattern[]
-  fileGlobForESLint: GlobPattern | GlobPattern[]
+  fileGlobForTypescript: GlobPattern[]
+  fileGlobForESLint: GlobPattern[]
   showRestartNotificationForTypescript: boolean
   showRestartNotificationForESLint: boolean
 }
@@ -21,38 +35,41 @@ type ConfigProperties = {
 const TS_EXT_ID = 'vscode.typescript-language-features'
 const ESLINT_EXT_ID = 'dbaeumer.vscode-eslint'
 const THIS_EXT_NAME = 'vscode-auto-restart-typescript-eslint-servers'
-const THIS_EXT_ID = `neotan.${THIS_EXT_NAME}`
+const THIS_EXT_ID = `chrp.${THIS_EXT_NAME}`
 const THIS_EXT_CONFIG_PREFIX = `autoRestart` // i.e. Configuration `section`
 
 let tsWatcher: Disposable
 let eslintWatcher: Disposable
 
 export function activate(context: ExtensionContext) {
+  const debouncedRestartTsServer = debounce(restartTsServer, 2000)
+  const debouncedRestartEslintServer = debounce(restartEslintServer, 2000)
+
   workspace.onDidChangeConfiguration((e) => {
 
-    // Re-initiate the watchers might be overkill when any configuration 
-    // changed, but it's the easiest way to make sure the watchers are 
+    // Re-initiate the watchers might be overkill when any configuration
+    // changed, but it's the easiest way to make sure the watchers are
     // up-to-date with the latest configuration.
     if (e.affectsConfiguration(THIS_EXT_CONFIG_PREFIX)) {
       tsWatcher?.dispose()
       eslintWatcher?.dispose()
 
       if (getConfig('monitorFilesForTypescript')) {
-        tsWatcher = initWatcher('Typescript', restartTsServer)
+        tsWatcher = initWatcher('Typescript', debouncedRestartTsServer)
       }
 
       if (getConfig('monitorFilesForESLint')) {
-        eslintWatcher = initWatcher('ESLint', restartEslintServer)
+        eslintWatcher = initWatcher('ESLint', debouncedRestartEslintServer)
       }
     }
   })
 
   if (getConfig('monitorFilesForTypescript')) {
-    tsWatcher = initWatcher('Typescript', restartTsServer)
+    tsWatcher = initWatcher('Typescript', debouncedRestartTsServer)
   }
 
   if (getConfig('monitorFilesForESLint')) {
-    eslintWatcher = initWatcher('ESLint', restartEslintServer)
+    eslintWatcher = initWatcher('ESLint', debouncedRestartEslintServer)
   }
 }
 
@@ -72,40 +89,46 @@ function getConfig<K extends keyof ConfigProperties>(
 function restartTsServer() {
   const tsExtension = extensions.getExtension(TS_EXT_ID)
   if (!tsExtension || tsExtension.isActive === false) {
-    window.showErrorMessage(`${THIS_EXT_NAME} is not active or not running.`)
+    window.showWarningMessage(`${THIS_EXT_NAME} is not active or not running.`)
     return
   }
 
-  return commands.executeCommand("typescript.restartTsServer")
+  return commands.executeCommand("typescript.restartTsServer").then(() => {
+    if (getConfig(`showRestartNotificationForTypescript`)) {
+      window.showInformationMessage(
+        `Typescript Server Restarted`
+      )
+    }
+  })
 }
 
 function restartEslintServer() {
   const eslintExtension = extensions.getExtension(ESLINT_EXT_ID)
   if (!eslintExtension || eslintExtension.isActive === false) {
-    window.showErrorMessage("ESLint extension is not active or not running.")
+    window.showWarningMessage("ESLint extension is not active or not running.")
     return
   }
 
-  return commands.executeCommand("eslint.restart")
+  return commands.executeCommand("eslint.restart").then(() => {
+    if (getConfig(`showRestartNotificationForESLint`)) {
+      window.showInformationMessage(
+        `ESLint Server Restarted`
+      )
+    }
+  })
 }
 
-function initWatcher(extension: 'Typescript' | 'ESLint', cb: () => Thenable<unknown> | void): Disposable {
+function initWatcher(
+  extension: 'Typescript' | 'ESLint',
+  cb: () => Thenable<unknown> | void
+): Disposable {
   let globs = getConfig(`fileGlobFor${extension}`)
-  // Compatibility with older configuration format
-  if (!Array.isArray(globs)) {
-    globs = [globs]
-  }
 
   function createEventHandler(type: string) {
     return async (e: Uri) => {
       const filePath = e.path || e.fsPath
       try {
         await cb()
-        if (getConfig(`showRestartNotificationFor${extension}`)) {
-          window.showInformationMessage(
-            `${extension} Server Restarted as file(s) ${type}: ${filePath}`
-          )
-        }
       } catch (err) {
         throw new Error(
           `Failed to restart server when the file "${filePath}" was ${type}`,
