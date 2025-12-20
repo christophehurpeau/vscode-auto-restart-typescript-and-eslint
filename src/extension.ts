@@ -9,17 +9,34 @@ import {
   workspace,
 } from 'vscode'
 
-const debounce = function (func: (...args: any[]) => void, wait: number) {
+const debounceWithDoubleTimeIfLastCallNear = function (
+  func: (...args: any[]) => void,
+  wait: number
+) {
   let timeout: NodeJS.Timeout | undefined
+  let lastCallTime: number | undefined
+  const maxWait = wait * 2
+
   return function (...args: any[]) {
     const later = () => {
       timeout = undefined
+      lastCallTime = Date.now()
       func(...args)
     }
+
     if (timeout) {
       clearTimeout(timeout)
     }
-    timeout = setTimeout(later, wait)
+
+    const now = Date.now()
+    const timeSinceLastCall = lastCallTime ? now - lastCallTime : null
+
+    if (timeSinceLastCall && timeSinceLastCall >= maxWait) {
+      timeout = setTimeout(later, wait * 2)
+    } else {
+      timeout = setTimeout(later, wait)
+    }
+
   }
 }
 
@@ -42,8 +59,10 @@ let tsWatcher: Disposable
 let eslintWatcher: Disposable
 
 export function activate(context: ExtensionContext) {
-  const debouncedRestartTsServer = debounce(restartTsServer, 2000)
-  const debouncedRestartEslintServer = debounce(restartEslintServer, 2000)
+  const debouncedRestartTsServer =
+    debounceWithDoubleTimeIfLastCallNear(restartTsServer, 2000)
+  const debouncedRestartEslintServer =
+    debounceWithDoubleTimeIfLastCallNear(restartEslintServer, 2000)
 
   workspace.onDidChangeConfiguration((e) => {
 
