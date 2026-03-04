@@ -1,13 +1,13 @@
 {
   "name": "vscode-auto-restart-typescript-and-eslint",
-  "displayName": "Auto Restart TypeScript / ESLint",
-  "description": "Restart TypeScript / ESLint when monitored files were changed.",
+  "displayName": "Auto-Restarter: TypeScript & eslint Servers",
+  "description": "Watches project configuration and automatically restarts TypeScript and ESLint language servers when relevant files change.",
   "publisher": "chrp",
-  "version": "1.1.0",
+  "version": "1.2.1",
   "engines": {
     "vscode": "^1.74.0"
   },
-  "icon": "images/icon.png",
+  "icon": "images/alt-icon.png",
   "homepage": "https://github.com/christophehurpeau/vscode-auto-restart-typescript-and-eslint.git",
   "repository": {
     "type": "git",
