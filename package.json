@@ -1,20 +1,20 @@
 {
-  "name": "vscode-auto-restart-typescript-and-eslint",
-  "displayName": "Auto-Restarter: TypeScript & eslint Servers",
-  "description": "Watches project configuration and automatically restarts TypeScript and ESLint language servers when relevant files change.",
+  "name": "vscode-auto-restart-linters",
+  "displayName": "Auto-Restarter: TypeScript, ESLint, Oxlint, Oxfmt Servers",
+  "description": "Watches project configuration and automatically restarts TypeScript, ESLint, Oxlint, and Oxfmt language servers when relevant files change.",
   "publisher": "chrp",
-  "version": "1.2.1",
+  "version": "2.0.2",
   "engines": {
     "vscode": "^1.74.0"
   },
   "icon": "images/alt-icon.png",
-  "homepage": "https://github.com/christophehurpeau/vscode-auto-restart-typescript-and-eslint.git",
+  "homepage": "https://github.com/christophehurpeau/vscode-auto-restart-linters.git",
   "repository": {
     "type": "git",
-    "url": "https://github.com/christophehurpeau/vscode-auto-restart-typescript-and-eslint.git"
+    "url": "https://github.com/christophehurpeau/vscode-auto-restart-linters.git"
   },
   "bugs": {
-    "url": "https://github.com/christophehurpeau/vscode-auto-restart-typescript-and-eslint.git/issues"
+    "url": "https://github.com/christophehurpeau/vscode-auto-restart-linters.git/issues"
   },
   "keywords": [
     "monitor",
@@ -48,37 +48,68 @@
       "type": "object",
       "title": "Auto Restart TypeScript / ESLint Servers",
       "properties": {
+        "autoRestart.fileGlobForShared": {
+          "type": "array",
+          "default": [
+            "**/package.json",
+            "**/yarn.lock",
+            "**/bun.lock",
+            "**/package-lock.json",
+            "**/pnpm-lock.yaml"
+          ],
+          "scope": "window",
+          "markdownDescription": "Files that trigger a restart of **all** servers. Supports [Glob Pattern](https://code.visualstudio.com/api/references/vscode-api#GlobPattern)."
+        },
         "autoRestart.monitorFilesForTypescript": {
-          "type": "boolean",
-          "default": true,
+          "type": [
+            "boolean",
+            "string"
+          ],
+          "enum": [
+            true,
+            "auto-detect",
+            false
+          ],
+          "enumDescriptions": [
+            "Monitor files — warn if the extension is not found or not active.",
+            "Monitor files — silently skip if the extension is not found or not active.",
+            "Disable monitoring."
+          ],
+          "default": "auto-detect",
           "scope": "window",
           "markdownDescription": "Monitor TypeScript config files and restart its server."
         },
         "autoRestart.fileGlobForTypescript": {
           "type": "array",
           "default": [
-            "**/package.json",
-            "**/yarn.lock",
-            "**/bun.lock",
-            "**/package-lock.json",
             "**/tsconfig.{json,app.json,app.js,js,ts}"
           ],
           "scope": "window",
           "markdownDescription": "Monitors these files, supports [Glob Pattern](https://code.visualstudio.com/api/references/vscode-api#GlobPattern). Default [`**/tsconfig.{json,app.json,app.js,js,ts}`]."
         },
         "autoRestart.monitorFilesForESLint": {
-          "type": "boolean",
-          "default": true,
+          "type": [
+            "boolean",
+            "string"
+          ],
+          "enum": [
+            true,
+            "auto-detect",
+            false
+          ],
+          "enumDescriptions": [
+            "Monitor files — warn if the extension is not found or not active.",
+            "Monitor files — silently skip if the extension is not found or not active.",
+            "Disable monitoring."
+          ],
+          "default": "auto-detect",
           "scope": "window",
           "markdownDescription": "Monitor ESLint config files and restart its server."
         },
         "autoRestart.fileGlobForESLint": {
           "type": "array",
           "default": [
-            "**/package.json",
-            "**/yarn.lock",
-            "**/bun.lock",
-            "**/package-lock.json",
+            "**/tsconfig.{json,app.json,app.js,js,ts}",
             "**/eslint.config.{js,cjs,mjs}"
           ],
           "scope": "window",
@@ -95,6 +126,108 @@
           "default": true,
           "scope": "window",
           "markdownDescription": "Show notification when restarts ESLint server."
+        },
+        "autoRestart.monitorFilesForOxlint": {
+          "type": [
+            "boolean",
+            "string"
+          ],
+          "enum": [
+            true,
+            "auto-detect",
+            false
+          ],
+          "enumDescriptions": [
+            "Monitor files — warn if the extension is not found or not active.",
+            "Monitor files — silently skip if the extension is not found or not active.",
+            "Disable monitoring."
+          ],
+          "default": "auto-detect",
+          "scope": "window",
+          "markdownDescription": "Monitor Oxlint config files and restart its server."
+        },
+        "autoRestart.fileGlobForOxlint": {
+          "type": "array",
+          "default": [
+            "**/tsconfig.{json,app.json,app.js,js,ts}",
+            "**/.Oxlintrc.json",
+            "**/Oxlint.config.ts"
+          ],
+          "scope": "window",
+          "markdownDescription": "Monitors these files, supports [Glob Pattern](https://code.visualstudio.com/api/references/vscode-api#GlobPattern)."
+        },
+        "autoRestart.showRestartNotificationForOxlint": {
+          "type": "boolean",
+          "default": true,
+          "scope": "window",
+          "markdownDescription": "Show notification when restarts Oxlint server."
+        },
+        "autoRestart.monitorFilesForOxfmt": {
+          "type": [
+            "boolean",
+            "string"
+          ],
+          "enum": [
+            true,
+            "auto-detect",
+            false
+          ],
+          "enumDescriptions": [
+            "Monitor files — warn if the extension is not found or not active.",
+            "Monitor files — silently skip if the extension is not found or not active.",
+            "Disable monitoring."
+          ],
+          "default": "auto-detect",
+          "scope": "window",
+          "markdownDescription": "Monitor Oxfmt config files and restart its server."
+        },
+        "autoRestart.fileGlobForOxfmt": {
+          "type": "array",
+          "default": [
+            "**/.Oxfmtrc.{json,jsonc}",
+            "**/Oxfmt.config.ts"
+          ],
+          "scope": "window",
+          "markdownDescription": "Monitors these files, supports [Glob Pattern](https://code.visualstudio.com/api/references/vscode-api#GlobPattern)."
+        },
+        "autoRestart.showRestartNotificationForOxfmt": {
+          "type": "boolean",
+          "default": true,
+          "scope": "window",
+          "markdownDescription": "Show notification when restarts Oxfmt server."
+        },
+        "autoRestart.monitorFilesForTSGo": {
+          "type": [
+            "boolean",
+            "string"
+          ],
+          "enum": [
+            true,
+            "auto-detect",
+            false
+          ],
+          "enumDescriptions": [
+            "Monitor files — warn if the extension is not found or not active.",
+            "Monitor files — silently skip if the extension is not found or not active.",
+            "Disable monitoring."
+          ],
+          "default": "auto-detect",
+          "scope": "window",
+          "markdownDescription": "Monitor TypeScript config files and restart the tsgo server."
+        },
+        "autoRestart.fileGlobForTSGo": {
+          "type": "array",
+          "default": [
+            "**/tsconfig.{json,*.json}"
+          ],
+          "scope": "window",
+          "markdownDescription": "Monitors these files, supports [Glob Pattern](https://code.visualstudio.com/api/references/vscode-api#GlobPattern)."
+        },
+        "autoRestart.showRestartNotificationForTSGo": {
+          "type": "boolean",
+          "default": true,
+          "scope": "window",
+          "markdownDescription": "Show notification when restarts tsgo server."
         }
       }
     }
@@ -109,7 +242,7 @@
     "lint": "eslint src --ext ts"
   },
   "devDependencies": {
-    "@types/node": "16.x",
+    "@types/node": "^24.12.4",
     "@types/vscode": "^1.74.0",
     "@typescript-eslint/eslint-plugin": "^5.45.0",
     "@typescript-eslint/parser": "^5.45.0",

@@ -1,3 +1,13 @@
+## 2.0.0 (2026-05-27)
+
+* Add support for OXLint (`oxc.oxc-vscode`, command `oxc.restartServer`)
+* Add support for OXFmt (`oxc.oxc-vscode`, command `oxc.restartServerFormatter`)
+* Add support for tsgo / TypeScript Native Preview (`TypeScriptTeam.native-preview`, command `typescript.native-preview.restart`)
+* Add dedicated shared watcher for `package.json` and lockfiles — restarts all enabled servers
+* New `monitorFilesFor*` tri-state for all servers: `true` (monitor + warn if missing), `"auto-detect"` (monitor + silent skip), `false` (disabled)
+* All servers default to `"auto-detect"`
+* Add `pnpm-lock.yaml` to default shared globs
+
 ### 0.0.6 (2024-09-03)
 * Add development guidelines ([#12](https://github.com/neotan/vscode-auto-restart-typescript-eslint-servers/pull/12))
 * Support multiple globs in config ([#11](https://github.com/neotan/vscode-auto-restart-typescript-eslint-servers/pull/11)) - Thanks to [@j4k0xb](https://github.com/j4k0xb)

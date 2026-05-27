@@ -40,61 +40,129 @@ const debounceWithDoubleTimeIfLastCallNear = function (
   }
 }
 
+type WatcherKey =
+  'Shared' | 'Typescript' | 'ESLint' | 'Oxlint' | 'Oxfmt' | 'TSGo'
+type MonitorMode = true | 'auto-detect' | false
+type MonitorKey = Extract<keyof ConfigProperties, `monitorFilesFor${string}`>
+type NotificationKey =
+  Extract<keyof ConfigProperties, `showRestartNotificationFor${string}`>
+
 type ConfigProperties = {
-  monitorFilesForTypescript: boolean
-  monitorFilesForESLint: boolean
+  monitorFilesForTypescript: MonitorMode
+  monitorFilesForESLint: MonitorMode
+  monitorFilesForOxlint: MonitorMode
+  monitorFilesForOxfmt: MonitorMode
+  monitorFilesForTSGo: MonitorMode
+  fileGlobForShared: GlobPattern[]
   fileGlobForTypescript: GlobPattern[]
   fileGlobForESLint: GlobPattern[]
+  fileGlobForOxlint: GlobPattern[]
+  fileGlobForOxfmt: GlobPattern[]
+  fileGlobForTSGo: GlobPattern[]
   showRestartNotificationForTypescript: boolean
   showRestartNotificationForESLint: boolean
+  showRestartNotificationForOxlint: boolean
+  showRestartNotificationForOxfmt: boolean
+  showRestartNotificationForTSGo: boolean
 }
 
 const TS_EXT_ID = 'vscode.typescript-language-features'
 const ESLINT_EXT_ID = 'dbaeumer.vscode-eslint'
-const THIS_EXT_NAME = 'vscode-auto-restart-typescript-and-eslint'
+const Oxlint_EXT_ID = 'oxc.oxc-vscode'
+const TSGO_EXT_ID = 'TypeScriptTeam.native-preview'
+const THIS_EXT_NAME = 'vscode-auto-restart-linters'
 const THIS_EXT_ID = `chrp.${THIS_EXT_NAME}`
 const THIS_EXT_CONFIG_PREFIX = `autoRestart` // i.e. Configuration `section`
 
+let sharedWatcher: Disposable
 let tsWatcher: Disposable
 let eslintWatcher: Disposable
+let OxlintWatcher: Disposable
+let OxfmtWatcher: Disposable
+let tsgoWatcher: Disposable
 
 export function activate(context: ExtensionContext) {
-  const debouncedRestartTsServer =
-    debounceWithDoubleTimeIfLastCallNear(restartTsServer, 2000)
-  const debouncedRestartEslintServer =
-    debounceWithDoubleTimeIfLastCallNear(restartEslintServer, 2000)
+  const debouncedRestart = (fn: () => void) =>
+    debounceWithDoubleTimeIfLastCallNear(fn, 2000)
+
+  const restartTs = debouncedRestart(makeRestartFn(
+    TS_EXT_ID, 'monitorFilesForTypescript',
+    'typescript.restartTsServer',
+    'showRestartNotificationForTypescript', 'TypeScript',
+  ))
+  const restartEslint = debouncedRestart(makeRestartFn(
+    ESLINT_EXT_ID, 'monitorFilesForESLint',
+    'eslint.restart',
+    'showRestartNotificationForESLint', 'ESLint',
+  ))
+  const restartOxlint = debouncedRestart(makeRestartFn(
+    Oxlint_EXT_ID, 'monitorFilesForOxlint',
+    'oxc.restartServer',
+    'showRestartNotificationForOxlint', 'Oxlint',
+  ))
+  const restartOxfmt = debouncedRestart(makeRestartFn(
+    Oxlint_EXT_ID, 'monitorFilesForOxfmt',
+    'oxc.restartServerFormatter',
+    'showRestartNotificationForOxfmt', 'Oxfmt',
+  ))
+  const restartTSGo = debouncedRestart(makeRestartFn(
+    TSGO_EXT_ID, 'monitorFilesForTSGo',
+    'typescript.native-preview.restart',
+    'showRestartNotificationForTSGo', 'tsgo',
+  ))
+
+  function setupWatchers() {
+    sharedWatcher?.dispose()
+    tsWatcher?.dispose()
+    eslintWatcher?.dispose()
+    OxlintWatcher?.dispose()
+    OxfmtWatcher?.dispose()
+    tsgoWatcher?.dispose()
+
+    sharedWatcher = initWatcher('Shared', () => {
+      restartTs()
+      restartEslint()
+      restartOxlint()
+      restartOxfmt()
+      restartTSGo()
+    })
+
+    if (getConfig('monitorFilesForTypescript')) {
+      tsWatcher = initWatcher('Typescript', restartTs)
+    }
+    if (getConfig('monitorFilesForESLint')) {
+      eslintWatcher = initWatcher('ESLint', restartEslint)
+    }
+    if (getConfig('monitorFilesForOxlint')) {
+      OxlintWatcher = initWatcher('Oxlint', restartOxlint)
+    }
+    if (getConfig('monitorFilesForOxfmt')) {
+      OxfmtWatcher = initWatcher('Oxfmt', restartOxfmt)
+    }
+    if (getConfig('monitorFilesForTSGo')) {
+      tsgoWatcher = initWatcher('TSGo', restartTSGo)
+    }
+  }
 
   workspace.onDidChangeConfiguration((e) => {
-
     // Re-initiate the watchers might be overkill when any configuration
     // changed, but it's the easiest way to make sure the watchers are
     // up-to-date with the latest configuration.
     if (e.affectsConfiguration(THIS_EXT_CONFIG_PREFIX)) {
-      tsWatcher?.dispose()
-      eslintWatcher?.dispose()
-
-      if (getConfig('monitorFilesForTypescript')) {
-        tsWatcher = initWatcher('Typescript', debouncedRestartTsServer)
-      }
-
-      if (getConfig('monitorFilesForESLint')) {
-        eslintWatcher = initWatcher('ESLint', debouncedRestartEslintServer)
-      }
+      setupWatchers()
     }
   })
 
-  if (getConfig('monitorFilesForTypescript')) {
-    tsWatcher = initWatcher('Typescript', debouncedRestartTsServer)
-  }
-
-  if (getConfig('monitorFilesForESLint')) {
-    eslintWatcher = initWatcher('ESLint', debouncedRestartEslintServer)
-  }
+  setupWatchers()
 }
 
 export function deactivate() {
+  sharedWatcher?.dispose()
   tsWatcher?.dispose()
   eslintWatcher?.dispose()
+  OxlintWatcher?.dispose()
+  OxfmtWatcher?.dispose()
+  tsgoWatcher?.dispose()
   console.log(`Extension ${THIS_EXT_ID} is now deactivated!`)
 }
 
@@ -105,43 +173,38 @@ function getConfig<K extends keyof ConfigProperties>(
   return workspace.getConfiguration(THIS_EXT_CONFIG_PREFIX).get(property)!
 }
 
-function restartTsServer() {
-  const tsExtension = extensions.getExtension(TS_EXT_ID)
-  if (!tsExtension || tsExtension.isActive === false) {
-    window.showWarningMessage(`${THIS_EXT_NAME} is not active or not running.`)
-    return
-  }
-
-  return commands.executeCommand("typescript.restartTsServer").then(() => {
-    if (getConfig(`showRestartNotificationForTypescript`)) {
-      window.showInformationMessage(
-        `Typescript Server Restarted`
-      )
+function makeRestartFn(
+  extId: string,
+  monitorKey: MonitorKey,
+  command: string,
+  notificationKey: NotificationKey,
+  label: string,
+) {
+  return function () {
+    const mode = getConfig(monitorKey)
+    if (!mode) { return }
+    const ext = extensions.getExtension(extId)
+    if (!ext || !ext.isActive) {
+      if (mode === true) {
+        window.showWarningMessage(
+          `${label} extension is not installed or not active.`
+        )
+      }
+      return
     }
-  })
-}
-
-function restartEslintServer() {
-  const eslintExtension = extensions.getExtension(ESLINT_EXT_ID)
-  if (!eslintExtension || eslintExtension.isActive === false) {
-    window.showWarningMessage("ESLint extension is not active or not running.")
-    return
+    return commands.executeCommand(command).then(() => {
+      if (getConfig(notificationKey)) {
+        window.showInformationMessage(`${label} Server Restarted`)
+      }
+    })
   }
-
-  return commands.executeCommand("eslint.restart").then(() => {
-    if (getConfig(`showRestartNotificationForESLint`)) {
-      window.showInformationMessage(
-        `ESLint Server Restarted`
-      )
-    }
-  })
 }
 
 function initWatcher(
-  extension: 'Typescript' | 'ESLint',
+  watcherName: WatcherKey,
   cb: () => Thenable<unknown> | void
 ): Disposable {
-  let globs = getConfig(`fileGlobFor${extension}`)
+  const globs = getConfig(`fileGlobFor${watcherName}`)
 
   function createEventHandler(type: string) {
     return async (e: Uri) => {
